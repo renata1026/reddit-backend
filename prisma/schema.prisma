@@ -1,0 +1,60 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "cockroachdb"
+    url      = env("DATABASE_URL")
+}
+
+// Define the User model
+model User {
+    id       String     @id @default(uuid())
+    username String
+    password String
+    posts    Post[]
+    Upvote   Upvote[]
+    Downvote Downvote[]
+}
+
+// Define the Subreddit model
+model Subreddit {
+    id    String @id @default(uuid())
+    name  String
+    posts Post[]
+}
+
+// Define the Post model
+model Post {
+    id          String     @id @default(uuid())
+    text        String
+    title       String?
+    userId      String
+    subredditId String
+    parentId    String?
+    user        User       @relation(fields: [userId], references: [id])
+    subreddit   Subreddit  @relation(fields: [subredditId], references: [id])
+    upvotes     Upvote[]
+    downvotes   Downvote[]
+    childPosts  Post[]     @relation("ParentToChildren")
+    parent      Post?      @relation("ParentToChildren", fields: [postId], references: [id])
+    postId      String?
+}
+
+// Define the Upvote model
+model Upvote {
+    id     String @id @default(uuid())
+    userId String
+    postId String
+    user   User   @relation(fields: [userId], references: [id])
+    post   Post   @relation(fields: [postId], references: [id])
+}
+
+// Define the Downvote model
+model Downvote {
+    id     String @id @default(uuid())
+    userId String
+    postId String
+    user   User   @relation(fields: [userId], references: [id])
+    post   Post   @relation(fields: [postId], references: [id])
+}
