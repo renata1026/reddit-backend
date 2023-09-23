@@ -11,6 +11,7 @@ CREATE TABLE "User" (
 CREATE TABLE "Subreddit" (
     "id" STRING NOT NULL,
     "name" STRING NOT NULL,
+    "userId" STRING NOT NULL,
 
     CONSTRAINT "Subreddit_pkey" PRIMARY KEY ("id")
 );
@@ -23,7 +24,6 @@ CREATE TABLE "Post" (
     "userId" STRING NOT NULL,
     "subredditId" STRING NOT NULL,
     "parentId" STRING,
-    "postId" STRING,
 
     CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
 );
@@ -46,6 +46,18 @@ CREATE TABLE "Downvote" (
     CONSTRAINT "Downvote_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateIndex
+CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Upvote_userId_postId_key" ON "Upvote"("userId", "postId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Downvote_userId_postId_key" ON "Downvote"("userId", "postId");
+
+-- AddForeignKey
+ALTER TABLE "Subreddit" ADD CONSTRAINT "Subreddit_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
 -- AddForeignKey
 ALTER TABLE "Post" ADD CONSTRAINT "Post_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -53,7 +65,7 @@ ALTER TABLE "Post" ADD CONSTRAINT "Post_userId_fkey" FOREIGN KEY ("userId") REFE
 ALTER TABLE "Post" ADD CONSTRAINT "Post_subredditId_fkey" FOREIGN KEY ("subredditId") REFERENCES "Subreddit"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Post" ADD CONSTRAINT "Post_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Post" ADD CONSTRAINT "Post_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Post"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Upvote" ADD CONSTRAINT "Upvote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

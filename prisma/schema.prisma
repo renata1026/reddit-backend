@@ -9,26 +9,29 @@ datasource db {
 
 // Define the User model
 model User {
-    id       String     @id @default(uuid())
-    username String
-    password String
-    posts    Post[]
-    Upvote   Upvote[]
-    Downvote Downvote[]
+    id         String      @id @default(uuid())
+    username   String      @unique
+    password   String
+    posts      Post[]
+    subreddits Subreddit[]
+    upvotes    Upvote[]
+    downvotes  Downvote[]
 }
 
 // Define the Subreddit model
 model Subreddit {
-    id    String @id @default(uuid())
-    name  String
-    posts Post[]
+    id     String @id @default(uuid())
+    name   String
+    posts  Post[]
+    user   User   @relation(fields: [userId], references: [id])
+    userId String
 }
 
 // Define the Post model
 model Post {
     id          String     @id @default(uuid())
     text        String
-    title       String?
+    title       String
     userId      String
     subredditId String
     parentId    String?
@@ -36,9 +39,8 @@ model Post {
     subreddit   Subreddit  @relation(fields: [subredditId], references: [id])
     upvotes     Upvote[]
     downvotes   Downvote[]
-    childPosts  Post[]     @relation("ParentToChildren")
-    parent      Post?      @relation("ParentToChildren", fields: [postId], references: [id])
-    postId      String?
+    children    Post[]     @relation("ParentToChildren")
+    parent      Post?      @relation("ParentToChildren", fields: [parentId], references: [id])
 }
 
 // Define the Upvote model
@@ -48,6 +50,8 @@ model Upvote {
     postId String
     user   User   @relation(fields: [userId], references: [id])
     post   Post   @relation(fields: [postId], references: [id])
+
+    @@unique([userId, postId])
 }
 
 // Define the Downvote model
@@ -57,4 +61,6 @@ model Downvote {
     postId String
     user   User   @relation(fields: [userId], references: [id])
     post   Post   @relation(fields: [postId], references: [id])
+
+    @@unique([userId, postId])
 }
