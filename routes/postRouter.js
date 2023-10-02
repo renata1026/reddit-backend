@@ -22,6 +22,32 @@ async function getAllPostsWithChildren() {
   return posts;
 }
 
+postRouter.get('/:postId', async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const postById = await prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
+      include: {
+        children: {
+          include: {
+            children: true,
+          },
+        },
+        user: true,
+        subreddit: true,
+        upvotes: true,
+        downvotes: true,
+      },
+    });
+
+    res.send({ success: true, post: postById });
+  } catch (error) {
+    res.send({ success: false, error: error.message });
+  }
+});
+
 // Create a new post route
 postRouter.post('/', async (req, res) => {
   try {
